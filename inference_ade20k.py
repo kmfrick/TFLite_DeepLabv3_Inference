@@ -18,19 +18,24 @@ import tensorflow as tf
 import cv2
 import sys
 
-if len(sys.argv) < 2:
-    print("Usage: " + sys.argv[0] + " [test_image]")
+if len(sys.argv) < 4:
+    print("Usage: " + sys.argv[0] + " model_path image_path colormap_path")
     quit()
 
-interpreter = tf.lite.Interpreter(model_path="deeplabv3_257_mv_gpu.tflite")
+model_path = sys.argv[1]
+image_path = sys.argv[2]
+colormap_path = sys.argv[3]
+
+interpreter = tf.lite.Interpreter(model_path=model_path)
 interpreter.allocate_tensors()
 
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
 input_shape = input_details[0]['shape']
-input_data = cv2.normalize(cv2.imread(sys.argv[1]).astype(np.float32), None, 0.0, 1.0, cv2.NORM_MINMAX)
-input_data = cv2.resize(input_data, (input_shape[1], input_shape[2]))
+img = cv2.imread(image_path)
+img = cv2.resize(img, (input_shape[1], input_shape[2]))
+input_data = cv2.normalize(img.astype(np.uint8), None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 input_data = tf.reshape(input_data, input_shape)
 interpreter.set_tensor(input_details[0]['index'], input_data)
 
@@ -39,8 +44,11 @@ interpreter.invoke()
 output_data = interpreter.get_tensor(output_details[0]['index'])
 output_classes = np.uint8(tf.argmax(output_data, axis=3)[0])
 output_classes_rgb = cv2.cvtColor(output_classes, cv2.COLOR_GRAY2RGB)
-colormap = cv2.imread("pascal.png").astype(np.uint8)
+colormap = cv2.imread(colormap_path).astype(np.uint8)
 output_img = cv2.LUT(output_classes_rgb, colormap)
+h = int(output_img.shape[0]/2)
+w = int(output_img.shape[1]/2)
+output_img = output_img[:h, :w] # Slice the upper left quarter of the result image
 cv2.imshow("test_image", output_img)
 cv2.waitKey(0)
 
