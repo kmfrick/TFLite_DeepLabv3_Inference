@@ -42,13 +42,14 @@ interpreter.set_tensor(input_details[0]['index'], input_data)
 interpreter.invoke()
 
 output_data = interpreter.get_tensor(output_details[0]['index'])
-output_classes = np.uint8(tf.argmax(output_data, axis=3)[0])
+h = int(output_data.shape[1]/2)
+w = int(output_data.shape[2]/2)
+output_data = output_data[0, :h, :w] # Slice the upper left quarter of the result image
+output_data = cv2.resize(output_data, (h * 4, w * 4))
+output_classes = np.uint8(tf.argmax(output_data, axis=2))
 output_classes_rgb = cv2.cvtColor(output_classes, cv2.COLOR_GRAY2RGB)
 colormap = cv2.imread(colormap_path).astype(np.uint8)
 output_img = cv2.LUT(output_classes_rgb, colormap)
-h = int(output_img.shape[0]/2)
-w = int(output_img.shape[1]/2)
-output_img = output_img[:h, :w] # Slice the upper left quarter of the result image
 cv2.imshow("test_image", output_img)
 cv2.waitKey(0)
 

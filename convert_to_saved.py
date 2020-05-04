@@ -1,13 +1,11 @@
 #!/usr/bin/env python2
 
-# Run on TF 1.14!
-
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from tensorflow.python.saved_model import signature_constants
 from tensorflow.python.saved_model import tag_constants
 
 export_dir = "./deeplabv3_saved"
-graph_pb = "./deeplabv3_mnv2_ade20k_train_2018_12_03/frozen_inference_graph.pb"
+graph_pb = "./deeplabv3_xception_ade20k_train/frozen_inference_graph.pb"
 
 builder = tf.saved_model.builder.SavedModelBuilder(export_dir)
 

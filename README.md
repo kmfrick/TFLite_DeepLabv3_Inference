@@ -14,13 +14,7 @@ DeepLab v3 trained on the ADE20K dataset is available [here](http://download.ten
 
 The frozen inference graph will first have to be converted to a SavedModel, then it can be converted to a TFLite flatbuffer.
 
-Ensure you have both `python2` and `python3` installed, as well as `virtualenv` and `python3-venv`.
-
-On Ubuntu 20.04 you can install everything with
-
-```bash
-sudo apt install python2 virtualenv python3 python3-venv wget
-```
+Ensure you have `python3-venv` installed.
 
 Clone this repo, download and extract the frozen inference graph and weights
 
@@ -31,13 +25,13 @@ wget http://download.tensorflow.org/models/deeplabv3_mnv2_ade20k_train_2018_12_0
 tar xf deeplabv3_mnv2_ade20k_train_2018_12_03.tar.gz
 ```
 
-Create a python2 virtualenv for conversion to a SavedModel and install Tensorflow:
+Create a python virtualenv and install Tensorflow:
 
 ```bash
-virtualenv -p `which python2` venv_tf1
+python3 -m venv venv
 deactivate # This will fail if you don't have any venv activated, don't worry and try not to copy and paste code next time
-source ./venv_tf1/bin/activate
-python -m pip install tensorflow==1.14
+source ./venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
 Then you can run conversion to a SavedModel:
@@ -48,16 +42,7 @@ python ./convert_to_saved.py
 
 You will now have a `saved` subfolder in the current directory where the newly created SavedModel will reside.
 
-You can now deactivate the virtual environment and create another one for conversion to TFLite and inference
-
-```bash
-deactivate
-python3 -m venv venv_tf2
-source venv_tf2/bin/activate
-pip install -r requirements.txt
-```
-
-and run the conversion
+You can now convert the SavedModel to a TFLite flatbuffer
 
 ```bash
 python ./convert_to_tflite.py
